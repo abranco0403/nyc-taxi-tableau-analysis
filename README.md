@@ -6,7 +6,7 @@ An operations analysis of NYC yellow taxi trips in a 21-day sample from January 
 
 **Full walkthrough:** [docs/NYC_Yellow_Taxi_Project_Walkthrough.pdf](docs/NYC_Yellow_Taxi_Project_Walkthrough.pdf)
 
-![Dashboard](screenshots/dashboard.png)
+![Dashboard](screenshots/Overview.png)
 
 ## Objectives
 
