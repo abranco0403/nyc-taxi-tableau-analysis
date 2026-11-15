@@ -2,7 +2,7 @@
 
 An operations analysis of NYC yellow taxi trips in a 21-day sample from January to March 2016. The project answers four questions a fleet planner would ask: when trips happen, how long they last, how two vendors compare, and where pickups occur.
 
-**Interactive dashboard:** https://public.tableau.com/shared/DSM3RKW7N
+**Interactive dashboard:** [https://public.tableau.com/shared/DSM3RKW7N](https://public.tableau.com:9443/views/NYCTaxiAnalytics/Overview?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link)
 
 **Full walkthrough:** [docs/NYC_Yellow_Taxi_Project_Walkthrough.pdf](docs/NYC_Yellow_Taxi_Project_Walkthrough.pdf)
 
