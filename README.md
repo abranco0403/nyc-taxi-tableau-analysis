@@ -1,90 +1,125 @@
 # NYC Yellow Taxi Operations
 
-An operations analysis of NYC yellow taxi trips in a 21-day sample from January to March 2016. The project answers four questions: when trips happen, how long they last, how two vendors compare, and where pickups occur.
+An operations analysis of NYC yellow taxi trips in a 21-day sample from January to March 2016. The project answers four questions a fleet planner would ask: when trips happen, how long they last, how two vendors compare, and where pickups occur.
 
-**Interactive dashboard:** https://public.tableau.com/shared/DSM3RKW7N?:display_count=n&:origin=viz_share_linkCan
+**Interactive dashboard:** https://public.tableau.com/shared/DSM3RKW7N
+
+**Full walkthrough:** [docs/NYC_Yellow_Taxi_Project_Walkthrough.pdf](docs/NYC_Yellow_Taxi_Project_Walkthrough.pdf)
+
+![Dashboard](screenshots/dashboard.png)
+
+## Objectives
+
+1. Identify when demand peaks, by hour and by weekday.
+2. Describe how long trips last, and how that varies across trips.
+3. Compare the two vendors on volume and trip length.
+4. Show where pickups happen, and whether the vendors cover the same areas.
 
 ## Key findings
 
 **When**
-- Trips peak at 6 PM, with 49,315 trips, followed by 7 PM with 47,905.
-- The lowest hour is 5 AM, with 7,981 trips.
-- The top eight weekday-hour slots all fall between 6 and 9 PM. The busiest is Thursday at 7 PM, with 7,752 trips.
-- Average daily trips rose from about 32,400 in January to about 37,400 in February and about 39,400 in March.
+- Demand peaks at 6 PM (49,315 trips), followed by 7 PM (47,905) and 8 PM (43,836).
+- The quietest hour is 5 AM, with 7,981 trips.
+- 11 of the 12 busiest weekday-hour slots fall between 6 and 9 PM. The busiest is Thursday at 7 PM (7,752 trips).
+- 6 to 9 PM accounts for 24.0% of all trips in the sample.
+- Average daily trips rose 21% from January (32,448) to March (39,380).
 
 **How long**
-- Median trip duration is 10.4 minutes, and the mean is 12.9 minutes.
-- 42.4% of trips last between 10 and 25 minutes. The longest trip is 118.5 minutes.
+- Median trip duration is 10.4 minutes. The mean is 12.9 minutes.
+- 42.4% of trips last between 10 and 25 minutes.
+- The longest trip in the sample is 118.5 minutes.
 
 **Who**
-- Vendor 2 handled 410,780 trips (54%). Vendor 1 handled 354,074 (46%).
-- Average trip duration is nearly the same for both: 12.83 minutes for Vendor 1 and 13.01 minutes for Vendor 2.
-- Both vendors' averages rose from January to March.
+- Vendor 2 handled 410,780 trips (53.7%). Vendor 1 handled 354,074 (46.3%).
+- Average trip length is nearly the same: 12.83 minutes for Vendor 1 and 13.01 minutes for Vendor 2.
+- Both vendors' averages rise from January to March. The gap between them stays between 0.14 and 0.22 minutes each month.
 
 **Where**
-- In a grid of roughly 1 km squares, 105 of 107 busy squares (200 or more pickups) show mixed pickups. Neither vendor has more than twice the other's pickups in those squares.
-- Only one square leans clearly toward each vendor.
+- In squares of roughly 1 km, 105 of the 107 busy squares (200 or more pickups) are mixed: neither vendor has more than twice the other's pickups.
+- Two squares lean clearly toward one vendor: one toward Vendor 1 (200 pickups against 98) and one toward Vendor 2 (295 against 96).
 
 **Passengers**
-- Average is 1.67 passengers per trip. 71% of trips have one passenger.
+- The average trip has 1.67 passengers. 70.9% of trips have one passenger.
 
-## Limitations
+## Dataset
 
-- The data covers 21 days, seven each in January, February, and March 2016. It is not a full year, and the three months are not continuous.
-- Each weekday appears three times, so weekday patterns describe the sample, not an established weekly norm.
-- The findings describe patterns. They don't explain causes.
-
-## Data
-
-- **Full dataset:** NYC Taxi and Limousine Commission yellow taxi trip records, 764,854 trips. Download the official source to reproduce the full analysis. The full file is not stored in this repository.
-- **Sample:** `data/sample.csv` contains the first 1,000 rows, for testing the calculations and the workbook.
+- **Source:** NYC Taxi and Limousine Commission yellow taxi trip records, cleaned.
+- **Coverage:** 764,854 trips on 21 days, seven each in January, February, and March 2016. The three months are not continuous.
+- **Full file:** not stored in this repository. Download it from the source to reproduce the analysis.
+- **Sample:** `data/sample.csv` holds the first 100 trips, for exploring the workbook. It does not reproduce the findings.
 - **Data dictionary:** `data/README.md` lists each column, its meaning, and its units.
-- **Units:** `trip_duration` in the cleaned file is in minutes (maximum about 118.5).
+- **Units:** `trip_duration` is in **seconds** in the source file. All durations here are converted to minutes.
+
+## Data validation
+
+Before analysis, the file was checked for common problems:
+- Row count confirmed at 764,854.
+- No zero or negative durations.
+- Recorded trip duration matches dropoff minus pickup time on every trip.
+- Vendor IDs are only 1 and 2.
+- Duration unit confirmed as seconds from the first trip (1,110 seconds = 18.5 minutes).
 
 ## Method
 
-1. **Clean and validate.** Confirmed the row count, checked for zero or negative durations (none found), and confirmed the sample covers 21 days.
-2. **Calculate measures in Tableau.** Built calculated fields for:
-   - Peak hour flag: flags 6 PM.
-   - Trips per day: trip count divided by distinct sample days in each month.
-   - Median duration: uses MEDIAN on trip_duration.
-   - Grid cell: rounds pickup latitude and longitude to two decimals to group pickups into squares.
-3. **Build six analyses.**
-   - Demand by hour of day (bar chart, highlighted peak).
-   - Weekday by hour heatmap (manual weekday sort, one sequential color).
-   - Trips per day by month (bar chart with zero baseline).
-   - Trip duration distribution (5-minute buckets, median bucket highlighted).
-   - Duration by vendor and month (grouped bars, one color per vendor).
-   - Pickup maps by vendor (filtered to one vendor each, same zoom).
-4. **Assemble the dashboard.** Four sections: When, How long, Who, Where. KPI strip at the top: trips, median, peak hour, and vendor share.
-5. **Publish.** Tableau Public, with the sample size in the title and description.
-6. **Verify.** `verify_findings.py` recalculates the headline numbers from the full source file, so every figure can be checked.
+1. **Validate** the data as described above.
+2. **Calculate measures** in Tableau:
+   - Duration in minutes: `trip_duration / 60`.
+   - Median duration: `ROUND(MEDIAN(...) / 60, 1)`, shown as 10.4.
+   - Peak hour label, and vendor share label.
+   - Duration buckets: 5-minute intervals for the histogram.
+   - Grid cell: pickup latitude and longitude rounded to two decimals.
+3. **Explore** each question with summaries before choosing a chart.
+4. **Build** six analyses: demand by hour, weekday-by-hour heatmap, trips per day by month, trip duration histogram, duration by vendor and month, and pickup maps by vendor.
+5. **Assemble** the dashboard in four sections (When, How long, Who, Where), with a KPI strip at the top.
+6. **Verify** every headline figure with `verify_findings.py`, which recalculates them from the full file using only the Python standard library.
 
-## Design choices
+## Exploratory analysis
 
-- One accent color per meaning: blue for Vendor 1 and general bars, orange for Vendor 2, slate for highlights so orange stays reserved for the vendor.
-- Headlines state the finding. Subheaders give the method and sample size.
-- Zero baselines on every bar chart.
-- Gridlines only on the value axis of bar charts.
-- The vendor maps are split into two panels because overlapping points hide one vendor's pattern.
+The EDA covered hourly and weekday demand, daily volume by month, the shape of the trip duration distribution, vendor comparison by month, pickup concentration on a grid, and passenger counts. The full write-up, including the summaries behind each chart, is in the walkthrough PDF.
+
+Notable points from the EDA:
+- Trip duration is right-skewed. Most trips fall between 0 and 20 minutes, with a long tail, so the median (10.4) is reported with the mean (12.9).
+- The vendor difference is small in every month, so the two vendors look operationally similar in this sample.
+
+## Visualizations and design choices
+
+- **Hourly demand (bars):** zero baseline, peak highlighted, so the 6 PM peak is easy to compare.
+- **Weekday by hour (heatmap):** one sequential color, weekdays in calendar order.
+- **Trips per day (bars):** zero baseline, so the 21% change is shown honestly.
+- **Trip duration (histogram):** 5-minute buckets with the median bucket highlighted.
+- **Vendors by month (grouped bars):** blue for Vendor 1, orange for Vendor 2 only.
+- **Pickup maps:** one map per vendor at the same zoom, because overlapping points hide one vendor's pattern.
+
+Color rules: blue for Vendor 1 and general bars, orange for Vendor 2 only, slate for highlights. Headlines state the finding. Subtitles give the measure, unit, and sample size.
+
+## Limitations
+
+- 21 sample days in three non-consecutive months. This is not a full year, and it can't show seasonal trends.
+- Each weekday appears three times, so weekday patterns describe this sample, not a settled weekly norm.
+- The findings describe patterns. They do not explain causes such as weather, events, or driver supply.
 
 ## Repository contents
 
 - `README.md`: this file.
-- `dashboard/nyc_taxi_operations.twb`: the Tableau workbook. Relink the data source to `data/sample.csv` or your local copy of the full file.
-- `data/sample.csv`: first 1,000 rows of the trip data.
+- `docs/NYC_Yellow_Taxi_Project_Walkthrough.pdf`: full walkthrough of the process, EDA, chart rationale, dashboard design, and corrections.
+- `dashboard/nyc_taxi_operations.twb`: the Tableau workbook. Relink its data source to your local copy of the full file.
+- `data/sample.csv`: first 100 trips.
 - `data/README.md`: data dictionary.
-- `verify_findings.py`: recalculates the headline findings from the full source file.
+- `verify_findings.py`: recalculates the headline figures from the full file.
 - `screenshots/`: dashboard image and vendor maps.
 - `.gitignore`: excludes local copies of the full dataset.
 
-## Build it yourself
+## Reproduce the results
 
-1. Download the full dataset from the NYC Taxi and Limousine Commission, or use `data/sample.csv` to explore the workbook.
-2. Open `dashboard/nyc_taxi_operations.twb` in Tableau Desktop and relink the data source.
-3. Review the calculated fields listed in the Method section.
-4. Run `verify_findings.py` with the path to the full file to confirm the headline numbers.
+1. Download the full cleaned dataset from the NYC Taxi and Limousine Commission and save it locally.
+2. Run the verification script:
+
+   ```
+   python3 verify_findings.py path/to/your/full_file.csv
+   ```
+
+3. Open `dashboard/nyc_taxi_operations.twb` in Tableau Desktop and relink the data source to your full file.
 
 ## Tools
 
-Tableau Desktop and Tableau Public. Calculations in Tableau. Verification of figures in Python.
+Tableau Desktop and Tableau Public for analysis and publishing. Python 3 standard library for verification.
